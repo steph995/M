@@ -1,0 +1,116 @@
+let
+    Source = #"GL Details",
+    #"Removed Other Columns" = Table.SelectColumns(Source,{"GL Det Index", "GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "Major Account", "RefNoMisc",  "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "Customer", "Vendor", "BOL-Letters Removed", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original"}),
+   
+   
+    #"Merged Queries" = Table.Join(#"Removed Other Columns", "GL Det Index", Append1, "GL Det Index.1", JoinKind.LeftOuter, JoinAlgorithm.SortMerge),
+
+   
+    #"BOL-Letters Removed--rmvd ""Multiple""" = Table.ReplaceValue(#"Merged Queries","Multiple","",Replacer.ReplaceText,{"BOL-Letters Removed"}),
+    #"Replaced Value1" = Table.ReplaceValue(#"BOL-Letters Removed--rmvd ""Multiple""","",null,Replacer.ReplaceValue,{"Site", "Reference Date", "Major Account", "RefNoMisc", "OrderNbr-Merged", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "Customer", "Vendor", "BOL-Letters Removed", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.DestinationCity", "FromOrdNotInv.PDI_APV_ID", "FromOrdNotInv.PDI_ARC_ID", "FromOrdNotInv.BillOfLading", "FromOrdNotInv.PDI_APV_ID_Car", "FromGenxref.SELLER_637", "FromGenxref.ORIGIN_CITY", "FromGenxref.ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "FromGenxref.DESTINATION_CITY", "FromGenxref.DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "FromGenxref.Manifest","MANIFEST-Final",  "SELLER_637", "ORIGIN_CITY", "ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "DESTINATION_CITY", "DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "ORIGINAL_PRODUCT"}),
+    #"Alphabatize Columns" = Table.SelectColumns(#"Replaced Value1",{"Batch Number Prefix", "BOL-Letters Removed", "BOL-Letters Removed.1", "BOLNbr-Final.1", "BOL-Original", "BusinessEvent", "Customer", "Description", "DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "DESTINATION_CITY", "FromGenxref.DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "FromGenxref.DESTINATION_CITY", "FromGenxref.Manifest", "FromGenxref.ORIGIN_CITY", "FromGenxref.ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "FromGenxref.ORIGINAL_PRODUCT", "FromGenxref.SELLER_637", "FromOrdNotInv.BillOfLading", "FromOrdNotInv.DestinationCity", "FromOrdNotInv.Ord_No", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID", "FromOrdNotInv.PDI_APV_ID_Car", "FromOrdNotInv.PDI_ARC_ID", "GL Account", "GL Account.1", "GL Det Index", "GL Det Index.1", "InvoiceNbr12-Merged", "InvoiceNbr12-Merged.1", "InvoiceNbr-Merged", "InvoiceNbr-Merged.1", "Journal Date", "Major Account", "Major Account.1", "Manifest", "MANIFEST-Final", "OrderNbr-Merged", "OrderNbr-Merged.1", "Order-Original", "ORIGIN_CITY", "ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "ORIGINAL_PRODUCT", "Party.1.1", "Party.1.1.1", "Party-Original", "Reference Date", "Reference Date.1", "Reference No-Original", "RefNoMisc", "RefNoMisc.1", "SELLER_637", "Site", "Tax Amount", "Tax Amount-ABS", "Tax Amount-ABS.1", "Vendor"}),
+    #"Reordered Columns" = Table.ReorderColumns(#"Alphabatize Columns",{"GL Det Index", "Batch Number Prefix", "BOL-Letters Removed", "BOL-Letters Removed.1", "BOLNbr-Final.1", "BOL-Original", "BusinessEvent", "Customer", "Description", "DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "DESTINATION_CITY", "FromGenxref.DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "FromGenxref.DESTINATION_CITY", "FromGenxref.Manifest", "FromGenxref.ORIGIN_CITY", "FromGenxref.ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "FromGenxref.ORIGINAL_PRODUCT", "FromGenxref.SELLER_637", "FromOrdNotInv.BillOfLading", "FromOrdNotInv.DestinationCity", "FromOrdNotInv.Ord_No", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID", "FromOrdNotInv.PDI_APV_ID_Car", "FromOrdNotInv.PDI_ARC_ID", "GL Account", "GL Account.1", "GL Det Index.1", "InvoiceNbr12-Merged", "InvoiceNbr12-Merged.1", "InvoiceNbr-Merged", "InvoiceNbr-Merged.1", "Journal Date", "Major Account", "Major Account.1", "Manifest", "MANIFEST-Final", "OrderNbr-Merged", "OrderNbr-Merged.1", "Order-Original", "ORIGIN_CITY", "ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "ORIGINAL_PRODUCT", "Party.1.1", "Party.1.1.1", "Party-Original", "Reference Date", "Reference Date.1", "Reference No-Original", "RefNoMisc", "RefNoMisc.1", "SELLER_637", "Site", "Tax Amount", "Tax Amount-ABS", "Tax Amount-ABS.1", "Vendor"}),
+    #"Inserted Merged Column6" = Table.AddColumn(#"Reordered Columns", "BOL-FinalMerged", each Text.Combine({[#"BOL-Letters Removed"], [#"BOL-Letters Removed.1"], [#"BOLNbr-Final.1"], [FromGenxref.Manifest], [FromOrdNotInv.BillOfLading], [Manifest], [#"MANIFEST-Final"]}, ";"), type text),
+    #"Removed Columns" = Table.RemoveColumns(#"Inserted Merged Column6",{"BOL-Letters Removed", "BOL-Letters Removed.1", "BOLNbr-Final.1", "FromGenxref.Manifest", "FromOrdNotInv.BillOfLading", "Manifest", "MANIFEST-Final"}),
+    #"Inserted Merged Column1" = Table.AddColumn(#"Removed Columns", "DestCity-MrgdSrc", each Text.Combine({[DESTINATION_CITY], [FromGenxref.DESTINATION_CITY], [FromOrdNotInv.DestinationCity]}, ";"), type text),
+    #"Removed Columns1" = Table.RemoveColumns(#"Inserted Merged Column1",{"FromOrdNotInv.DestinationCity", "FromGenxref.DESTINATION_CITY", "DESTINATION_CITY"}),
+    #"Inserted Merged Column2" = Table.AddColumn(#"Removed Columns1", "DestCustID-MrgdSrc", each Text.Combine({[#"DEST_CUSTOM_ID_CODE-LeadC&SRmvd"], [#"FromGenxref.DEST_CUSTOM_ID_CODE-LeadC&SRmvd"]}, ";"), type text),
+    #"Removed Columns2" = Table.RemoveColumns(#"Inserted Merged Column2",{"FromGenxref.DEST_CUSTOM_ID_CODE-LeadC&SRmvd", "DEST_CUSTOM_ID_CODE-LeadC&SRmvd"}),
+    #"Inserted Merged Column3" = Table.AddColumn(#"Removed Columns2", "OriginCity-MrgdSrc", each Text.Combine({[ORIGIN_CITY], [FromGenxref.ORIGIN_CITY]}, ";"), type text),
+    #"Removed Columns3" = Table.RemoveColumns(#"Inserted Merged Column3",{"FromGenxref.ORIGIN_CITY", "ORIGIN_CITY"}),
+    #"Inserted Merged Column4" = Table.AddColumn(#"Removed Columns3", "OriginCustID-MrgdSrc", each Text.Combine({[#"ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-"""], [#"FromGenxref.ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-"""]}, ";"), type text),
+    #"Removed Columns4" = Table.RemoveColumns(#"Inserted Merged Column4",{"FromGenxref.ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-""", "ORIGIN_CUSTOM_ID_CODE-RmvdLeading""S-"""}),
+    #"Inserted Merged Column5" = Table.AddColumn(#"Removed Columns4", "Seller-MrgdSrc", each Text.Combine({[SELLER_637], [FromGenxref.SELLER_637], [FromOrdNotInv.PDI_APV_ID], [Vendor]}, ";"), type text),
+    #"Removed Columns5" = Table.RemoveColumns(#"Inserted Merged Column5",{"Vendor", "FromOrdNotInv.PDI_APV_ID", "FromGenxref.SELLER_637", "SELLER_637"}),
+    #"Inserted Merged Column8" = Table.AddColumn(#"Removed Columns5", "Customer-MrgdSrc", each Text.Combine({[FromOrdNotInv.PDI_ARC_ID], [Customer]}, ";"), type text),
+    #"Removed Columns8" = Table.RemoveColumns(#"Inserted Merged Column8",{"Customer", "FromOrdNotInv.PDI_ARC_ID", "Major Account"}),
+    #"Split Column by Delimiter" = Table.SplitColumn(#"Removed Columns8", "BOL-MrgdSrc", Splitter.SplitTextByDelimiter(";", QuoteStyle.None), {"BOL-MrgdSrc.1", "BOL-MrgdSrc.2"}),
+    #"CompareSplBOLCols-RetBest" = Table.AddColumn(#"Split Column by Delimiter", "BOL-MrgdSrc", each if [#"BOL-MrgdSrc.1"]=null and [#"BOL-MrgdSrc.2"]=null then null
+else if Text.Start([#"BOL-MrgdSrc.1"],5)
+=Text.Start([#"BOL-MrgdSrc.2"],5) and 
+Text.Length([#"BOL-MrgdSrc.2"])>
+Text.Length([#"BOL-MrgdSrc.1"]) then [#"BOL-MrgdSrc.2"] else if
+Text.Start([#"BOL-MrgdSrc.1"],5)
+=Text.Start([#"BOL-MrgdSrc.2"],5) and 
+Text.Length([#"BOL-MrgdSrc.2"])<
+Text.Length([#"BOL-MrgdSrc.1"]) then [#"BOL-MrgdSrc.1"] 
+else if
+[#"BOL-MrgdSrc.1"]=null and [#"BOL-MrgdSrc.2"]<>null then [#"BOL-MrgdSrc.2"] 
+else if
+[#"BOL-MrgdSrc.2"]=null and [#"BOL-MrgdSrc.1"]<>null then [#"BOL-MrgdSrc.1"]
+else if
+[#"BOL-MrgdSrc.1"]=[#"BOL-MrgdSrc.2"] then [#"BOL-MrgdSrc.1"]
+else "you broke Excel"),
+    #"Removed Columns9" = Table.RemoveColumns(#"CompareSplBOLCols-RetBest",{"BOL-MrgdSrc.1", "BOL-MrgdSrc.2"}),
+    #"Changed Type" = Table.TransformColumnTypes(#"Removed Columns9",{{"BOL-MrgdSrc", type text}}),
+    #"Replaced Value2" = Table.ReplaceValue(#"Changed Type","",null,Replacer.ReplaceValue,{"DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "Seller-MrgdSrc", "Customer-MrgdSrc", "BOL-MrgdSrc"}),
+    #"Grouped Rows" = Table.Group(#"Replaced Value2", {"GL Det Index"}, {{"Count", each Table.RowCount(_), Int64.Type}, {"All", each _, type table [GL Det Index=number, GL Account=nullable text, Journal Date=nullable date, Batch Number Prefix=nullable text, Site=nullable text, Reference Date=nullable date, #"OrderNbr-Merged"=nullable text, RefNoMisc=nullable text, #"InvoiceNbr12-Merged"=nullable text, #"InvoiceNbr-Merged"=nullable text, Tax Amount=nullable number, #"Tax Amount-ABS"=nullable number, Party.1.1=nullable text, #"BOL-Original"=nullable text, #"Party-Original"=nullable text, #"Reference No-Original"=nullable text, #"Order-Original"=nullable text, FromOrdNotInv.OriginTerminalCode=nullable text, FromOrdNotInv.PDI_APV_ID_Car=nullable text, ORIGINAL_PRODUCT=nullable text, #"DestCity-MrgdSrc"=nullable text, #"DestCustID-MrgdSrc"=nullable text, #"OriginCity-MrgdSrc"=nullable text, #"OriginCustID-MrgdSrc"=nullable text, #"Seller-MrgdSrc"=nullable text, #"BOLDate-MrgdSrc"=nullable text, #"InvDate-MrgdSrc"=nullable text, #"Customer-MrgdSrc"=nullable text, #"BOL-MrgdSrc"=nullable text]}}),
+    #"Expanded All" = Table.ExpandTableColumn(#"Grouped Rows", "All", {"GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "Seller-MrgdSrc", "Customer-MrgdSrc", "BOL-MrgdSrc"}, {"GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "Seller-MrgdSrc", "Customer-MrgdSrc", "BOL-MrgdSrc"}),
+    #"Seller-Split Column by Delimiter" = Table.SplitColumn(#"Expanded All", "Seller-MrgdSrc", Splitter.SplitTextByDelimiter(";", QuoteStyle.None), {"Seller-MrgdSrc.1", "Seller-MrgdSrc.2"}),
+    #"CompareSplSellerCols-RetBest" = Table.AddColumn(#"Seller-Split Column by Delimiter", "Seller", each if [#"Seller-MrgdSrc.1"]<>null and
+[#"Seller-MrgdSrc.2"]<>null and
+[#"Seller-MrgdSrc.1"]<>[#"Seller-MrgdSrc.2"]
+then "Multiple Sellers" 
+
+else if
+[#"Seller-MrgdSrc.1"]<>null and
+[#"Seller-MrgdSrc.2"]<>null and
+[#"Seller-MrgdSrc.1"]=[#"Seller-MrgdSrc.2"]
+then [#"Seller-MrgdSrc.1"]
+
+else if
+[#"Seller-MrgdSrc.1"]<>null and
+[#"Seller-MrgdSrc.2"]=null then
+[#"Seller-MrgdSrc.1"]
+
+else if
+[#"Seller-MrgdSrc.2"]<>null and
+[#"Seller-MrgdSrc.1"]=null then
+[#"Seller-MrgdSrc.2"]
+
+else if
+[#"Seller-MrgdSrc.1"]=null and
+[#"Seller-MrgdSrc.2"]=null then null
+
+else "Check"),
+    #"Customer-Split Column by Delimiter" = Table.SplitColumn(#"CompareSplSellerCols-RetBest", "Customer-MrgdSrc", Splitter.SplitTextByDelimiter(";", QuoteStyle.None), {"Customer-MrgdSrc.1", "Customer-MrgdSrc.2"}),
+    #"CompareSplCustCols-RetBest" = Table.AddColumn(#"Customer-Split Column by Delimiter", "Customer", each if [#"Customer-MrgdSrc.1"]<>null and
+[#"Customer-MrgdSrc.2"]<>null and
+[#"Customer-MrgdSrc.1"]<>[#"Customer-MrgdSrc.2"]
+then "Multiple Customers" 
+
+else if
+[#"Customer-MrgdSrc.1"]<>null and
+[#"Customer-MrgdSrc.2"]<>null and
+[#"Customer-MrgdSrc.1"]=[#"Customer-MrgdSrc.2"]
+then [#"Customer-MrgdSrc.1"]
+
+else if
+[#"Customer-MrgdSrc.1"]<>null and
+[#"Customer-MrgdSrc.2"]=null then
+[#"Customer-MrgdSrc.1"]
+
+else if
+[#"Customer-MrgdSrc.2"]<>null and
+[#"Customer-MrgdSrc.1"]=null then
+[#"Customer-MrgdSrc.2"]
+
+else if
+[#"Customer-MrgdSrc.1"]=null and
+[#"Customer-MrgdSrc.2"]=null then null
+
+else "Check"),
+    #"Removed old Seller & Cust cols" = Table.SelectColumns(#"CompareSplCustCols-RetBest",{"GL Det Index", "Count", "GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc",  "BOL-MrgdSrc", "Seller", "Customer"}),
+    #"Changed Type1" = Table.TransformColumnTypes(#"Removed old Seller & Cust cols",{{"Seller", type text}, {"Customer", type text}}),
+    #"CountNonNullCols--Added Custom" = Table.AddColumn(#"Changed Type1", "RowNonNullCount", each List.NonNullCount(List.Range(Record.FieldValues(_),18,9))),
+    #"LabelDupes--Added Conditional Column" = Table.AddColumn(#"CountNonNullCols--Added Custom", "Dupe", each if [Count] > 1 then "Dupe" else null),
+    #"Sorted Rows" = Table.Sort(#"LabelDupes--Added Conditional Column",{{"GL Det Index", Order.Ascending}}),
+    #"Grouped Rows1" = Table.Group(#"Sorted Rows", {"GL Det Index"}, {{"Max", each List.Max([RowNonNullCount]), type number}, {"All", each _, type table [GL Det Index=number, Count=number, GL Account=nullable text, Journal Date=nullable date, Batch Number Prefix=nullable text, Site=nullable text, Reference Date=nullable date, #"OrderNbr-Merged"=nullable text, RefNoMisc=nullable text, #"InvoiceNbr12-Merged"=nullable text, #"InvoiceNbr-Merged"=nullable text, Tax Amount=nullable number, #"Tax Amount-ABS"=nullable number, Party.1.1=nullable text, #"BOL-Original"=nullable text, #"Party-Original"=nullable text, #"Reference No-Original"=nullable text, #"Order-Original"=nullable text, FromOrdNotInv.OriginTerminalCode=nullable text, FromOrdNotInv.PDI_APV_ID_Car=nullable text, ORIGINAL_PRODUCT=nullable text, #"DestCity-MrgdSrc"=nullable text, #"DestCustID-MrgdSrc"=nullable text, #"OriginCity-MrgdSrc"=nullable text, #"OriginCustID-MrgdSrc"=nullable text, #"BOL-MrgdSrc"=nullable text, Seller=nullable text, Customer=nullable text, RowNonNullCount=number, Dupe=text]}}),
+    #"Changed Type2" = Table.TransformColumnTypes(#"Grouped Rows1",{{"Max", Int64.Type}}),
+    #"Expanded All1" = Table.ExpandTableColumn(#"Changed Type2", "All", {"GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "BOL-MrgdSrc", "Seller", "Customer", "RowNonNullCount"}, {"GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "BOL-MrgdSrc", "Seller", "Customer", "RowNonNullCount"}),
+    #"Added Custom" = Table.AddColumn(#"Expanded All1", "Max minus RowNonNullCount", each [Max]-[RowNonNullCount]),
+    #"Filtered Rows" = Table.SelectRows(#"Added Custom", each ([Max minus RowNonNullCount] = 0)),
+    #"Removed Duplicates" = Table.Distinct(#"Filtered Rows", {"GL Det Index"}),
+    #"Removed Other Columns1" = Table.SelectColumns(#"Removed Duplicates",{"GL Det Index", "GL Account", "Journal Date", "Batch Number Prefix", "Site", "Reference Date", "OrderNbr-Merged", "RefNoMisc", "InvoiceNbr12-Merged", "InvoiceNbr-Merged", "Tax Amount", "Tax Amount-ABS", "Party.1.1", "BOL-Original", "Party-Original", "Reference No-Original", "Order-Original", "FromOrdNotInv.OriginTerminalCode", "FromOrdNotInv.PDI_APV_ID_Car", "ORIGINAL_PRODUCT", "DestCity-MrgdSrc", "DestCustID-MrgdSrc", "OriginCity-MrgdSrc", "OriginCustID-MrgdSrc", "BOL-MrgdSrc", "Seller", "Customer"})
+in
+    #"Removed Other Columns1"
